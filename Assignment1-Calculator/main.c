@@ -1,233 +1,304 @@
 #include <stdio.h>
 #include <ctype.h>
-#include <string.h>
-#include <limits.h>
 
-int length(char *p);
-int isValid(char *p, int n);
-void removeSpace(char *p);
-int isOperator(char ch);
-int isInvalid(char ch);
-int precedence(char ch);
-int calculate(int left, int right, char op, int *result);
-int evaluate(char *p, int n, int *result);
+int length(char *expression);
+int isValid(char *expression, int expressionLength);
+void removeSpace(char *expression);
+int isOperator(char character);
+int isInvalid(char character);
+int precedence(char operator);
+int calculate(int leftOperand, int rightOperand, char operator, int *result);
+int evaluate(char *expression, int expressionLength, int *result);
 
-int main() {
+int main()
+{
     char expression[1000];
+    int expressionLength;
+    int result;
 
     printf("Enter the Expression: ");
 
     gets(expression);
+
     removeSpace(expression);
-    int len = length(expression);
+    expressionLength = length(expression);
 
-    if (!isValid(expression, len)) {
+    if (!isValid(expression, expressionLength))
+    {
         printf("Error: Invalid expression.\n");
-        return 0;
+    }
+    else
+    {
+        if (evaluate(expression, expressionLength, &result))
+        {
+            printf("Result: %d\n", result);
+        }
     }
 
-    int result;
-
-    if (evaluate(expression, len, &result)) {
-        printf("Result: %d\n", result);
-    }
-
-return 0;
     return 0;
 }
 
-int length(char *p)
+int length(char *expression)
 {
     int count = 0;
-    int i = 0;
+    int index = 0;
 
-    while (*(p + i) != '\0') {
+    while (*(expression + index) != '\0')
+    {
         count++;
-        i++;
+        index++;
     }
 
     return count;
 }
 
-int isOperator(char ch)
+int isOperator(char character)
 {
-    return ch == '+' || ch == '-' || ch == '*' || ch == '/';
+    int result;
+
+    result = character == '+' ||
+             character == '-' ||
+             character == '*' ||
+             character == '/';
+
+    return result;
 }
 
-int isInvalid(char ch)
+int isInvalid(char character)
 {
-    return !isdigit(ch) && !isOperator(ch);
+    int result;
+
+    result = !isdigit(character) && !isOperator(character);
+
+    return result;
 }
 
-void removeSpace(char *p)
+void removeSpace(char *expression)
 {
-    int i = 0;
-    int j = 0;
+    int readIndex = 0;
+    int writeIndex = 0;
 
-    while (*(p + i) != '\0') {
-        if (*(p + i) != ' '  &&
-    *(p + i) != '\t') {
-            *(p + j) = *(p + i);
-            j++;
+    while (*(expression + readIndex) != '\0')
+    {
+        if (*(expression + readIndex) != ' ' &&
+            *(expression + readIndex) != '\t')
+        {
+            *(expression + writeIndex) = *(expression + readIndex);
+            writeIndex++;
         }
-        i++;
+
+        readIndex++;
     }
 
-    *(p + j) = '\0';
+    *(expression + writeIndex) = '\0';
 }
 
-int isValid(char *p, int n)
+int isValid(char *expression, int expressionLength)
 {
     int expectNumber = 1;
-    int i = 0;
+    int currentIndex = 0;
+    int valid = 1;
 
-    while (i < n) {
-        char ch = *(p + i);
+    while (currentIndex < expressionLength && valid)
+    {
+        char currentCharacter = *(expression + currentIndex);
 
-        if (isInvalid(ch)) {
-            return 0;
+        if (isInvalid(currentCharacter))
+        {
+            valid = 0;
         }
-
-        if (expectNumber) {
-            if (!isdigit(ch)) {
-                return 0;
+        else if (expectNumber)
+        {
+            if (!isdigit(currentCharacter))
+            {
+                valid = 0;
             }
+            else
+            {
+                while (currentIndex < expressionLength &&
+                       isdigit(*(expression + currentIndex)))
+                {
+                    currentIndex++;
+                }
 
-            while (i < n && isdigit(*(p + i))) {
-                i++;
+                expectNumber = 0;
             }
-
-            expectNumber = 0;
         }
-        else {
-            if (!isOperator(ch)) {
-                return 0;
+        else
+        {
+            if (!isOperator(currentCharacter))
+            {
+                valid = 0;
             }
-
-            i++;
-            expectNumber = 1;
+            else
+            {
+                currentIndex++;
+                expectNumber = 1;
+            }
         }
     }
 
-    return !expectNumber;
+    if (expectNumber)
+    {
+        valid = 0;
+    }
+
+    return valid;
 }
 
-int evaluate(char *p, int n, int *result)
+int evaluate(char *expression, int expressionLength, int *result)
 {
     int numbers[1000];
     char operators[1000];
 
     int numberTop = -1;
     int operatorTop = -1;
-    int i = 0;
+    int currentIndex = 0;
+    int evaluationSuccessful = 1;
 
-    if (n <= 0 || n >= 1000) {
+    if (expressionLength <= 0 || expressionLength >= 1000)
+    {
         printf("Error: Invalid expression.\n");
-        return 0;
+        evaluationSuccessful = 0;
     }
 
-    while (i <= n) {
-        char ch = *(p + i);
+    while (currentIndex <= expressionLength && evaluationSuccessful)
+    {
+        char currentCharacter = *(expression + currentIndex);
 
-        if (ch >= '0' && ch <= '9') {
+        if (currentCharacter >= '0' && currentCharacter <= '9')
+        {
             int number = 0;
 
-            while (i < n &&
-                   *(p + i) >= '0' &&
-                   *(p + i) <= '9') {
-
-                int digit = *(p + i) - '0';
-
-    
-                // if (number > (INT_MAX - digit) / 10) {
-                //     printf("Error: Integer overflow.\n");
-                //     return 0;
-                // }
+            while (currentIndex < expressionLength &&
+                   *(expression + currentIndex) >= '0' &&
+                   *(expression + currentIndex) <= '9')
+            {
+                int digit = *(expression + currentIndex) - '0';
 
                 number = number * 10 + digit;
-                i++;
+                currentIndex++;
             }
 
             numbers[++numberTop] = number;
         }
-        else {
+        else
+        {
             while (operatorTop >= 0 &&
-                   (ch == '\0' ||
-                    precedence(operators[operatorTop]) >= precedence(ch))) {
-
-                if (numberTop < 1) {
+                   evaluationSuccessful &&
+                   (currentCharacter == '\0' ||
+                    precedence(operators[operatorTop]) >=
+                    precedence(currentCharacter)))
+            {
+                if (numberTop < 1)
+                {
                     printf("Error: Invalid expression.\n");
-                    return 0;
+                    evaluationSuccessful = 0;
                 }
+                else
+                {
+                    int rightOperand = numbers[numberTop--];
+                    int leftOperand = numbers[numberTop--];
+                    char currentOperator = operators[operatorTop--];
+                    int calculatedValue;
 
-                int right = numbers[numberTop--];
-                int left = numbers[numberTop--];
-                char op = operators[operatorTop--];
-
-                int value;
-
-                if (!calculate(left, right, op, &value)) {
-                    return 0;
+                    if (calculate(leftOperand,
+                                  rightOperand,
+                                  currentOperator,
+                                  &calculatedValue))
+                    {
+                        numbers[++numberTop] = calculatedValue;
+                    }
+                    else
+                    {
+                        evaluationSuccessful = 0;
+                    }
                 }
-
-                numbers[++numberTop] = value;
             }
 
-            if (ch == '\0') {
-                break;
+            if (evaluationSuccessful)
+            {
+                if (currentCharacter == '\0')
+                {
+                    currentIndex = expressionLength + 1;
+                }
+                else
+                {
+                    operators[++operatorTop] = currentCharacter;
+                    currentIndex++;
+                }
             }
-
-            operators[++operatorTop] = ch;
-            i++;
         }
     }
 
-    if (numberTop != 0) {
-        printf("Error: Invalid expression.\n");
-        return 0;
+    if (evaluationSuccessful)
+    {
+        if (numberTop != 0)
+        {
+            printf("Error: Invalid expression.\n");
+            evaluationSuccessful = 0;
+        }
+        else
+        {
+            *result = numbers[numberTop];
+        }
     }
 
-    *result = numbers[numberTop];
-    return 1;
+    return evaluationSuccessful;
 }
 
-
-int calculate(int left, int right, char op, int *result)
+int calculate(int leftOperand,
+              int rightOperand,
+              char operator,
+              int *result)
 {
-    if (op == '+') {
-        *result = left + right;
+    int calculationSuccessful = 1;
+
+    if (operator == '+')
+    {
+        *result = leftOperand + rightOperand;
     }
-    else if (op == '-') {
-        *result = left - right;
+    else if (operator == '-')
+    {
+        *result = leftOperand - rightOperand;
     }
-    else if (op == '*') {
-        *result = left * right;
+    else if (operator == '*')
+    {
+        *result = leftOperand * rightOperand;
     }
-    else if (op == '/') {
-        if (right == 0) {
+    else if (operator == '/')
+    {
+        if (rightOperand == 0)
+        {
             printf("Error: Division by zero.\n");
-            return 0;
+            calculationSuccessful = 0;
         }
-
-        *result = left / right;
+        else
+        {
+            *result = leftOperand / rightOperand;
+        }
     }
-    else {
+    else
+    {
         printf("Error: Invalid expression.\n");
-        return 0;
+        calculationSuccessful = 0;
     }
 
-    return 1;
+    return calculationSuccessful;
 }
 
-int precedence(char ch)
+int precedence(char operator)
 {
-    if (ch == '*' || ch == '/') {
-        return 2;
+    int operatorPrecedence = 0;
+
+    if (operator == '*' || operator == '/')
+    {
+        operatorPrecedence = 2;
+    }
+    else if (operator == '+' || operator == '-')
+    {
+        operatorPrecedence = 1;
     }
 
-    if (ch == '+' || ch == '-') {
-        return 1;
-    }
-
-    return 0;
+    return operatorPrecedence;
 }
