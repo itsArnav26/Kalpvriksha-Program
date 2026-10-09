@@ -1,6 +1,7 @@
 #include <stdio.h>
 
-struct Student {
+struct Student 
+{
     int rollNo;
     char name[100];
     int marks1;
@@ -8,26 +9,26 @@ struct Student {
     int marks3;
 };
 
-int calTotal(struct Student stu);
-float calAverage(int total);
-char calGrade(float average);
-void printRoll(int n, int index, struct Student students[]);
+int calculateTotal(struct Student student);
+float calculateAverage(int total);
+char calculateGrade(float average);
+void printRollNumber(int noOfStudents, int index, struct Student students[]);
 
 int main() 
 {
 
     printf("Enter the number of students: ");
-    int n;
+    int noOfStudents;
 
-    scanf("%d", &n);
-    if (n <= 0 || n > 100) {
+    scanf("%d", &noOfStudents);
+    if (noOfStudents <= 0 || noOfStudents > 100) {
         printf("Invalid number of students. Please enter a number between 1 and 100.\n");
         return 0;
     }
-    struct Student students[n];
-    printf("Enter the details of %d students (rollNo name marks1 marks2 marks3):\n", n);
+    struct Student students[noOfStudents];
+    printf("Enter the details of %d students (rollNo name marks1 marks2 marks3):\n", noOfStudents);
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < noOfStudents; i++) {
         
       scanf("%d %s %d %d %d", &students[i].rollNo, students[i].name, &students[i].marks1, &students[i].marks2, &students[i].marks3);
 
@@ -39,11 +40,11 @@ int main()
         }
     }
     printf("\nStudent Details:\n\n");
-    for (int i = 0; i < n; i++){
+    for (int i = 0; i < noOfStudents; i++){
 
-      int total = calTotal(students[i]);
-      float average = calAverage(total);
-      char grade = calGrade(average);
+      int total = calculateTotal(students[i]);
+      float average = calculateAverage(total);
+      char grade = calculateGrade(average);
 
       printf("Roll: %d\n", students[i].rollNo);
       printf("Name: %s\n", students[i].name);
@@ -75,21 +76,21 @@ int main()
       printf("\n\n");
     }
     printf("\n");
-    printf("List of Roll Numbers (via recursion): ");
-    printRoll(n, 0, students);
+    printf("List of Roll Numbers : ");
+    printRollNumber(noOfStudents, 0, students);
     return 0;
 }
-int calTotal(struct Student stu)
+int calculateTotal(struct Student student)
 {
-  return stu.marks1 + stu.marks2 + stu.marks3;
+  return student.marks1 + student.marks2 + student.marks3;
 }
 
-float calAverage(int total)
+float calculateAverage(int total)
 {
   return (float)total / 3;
 }
 
-char calGrade(float average)
+char calculateGrade(float average)
 {
   if (average >= 85) {
     return 'A';
@@ -104,11 +105,11 @@ char calGrade(float average)
   }
 }
 
-void printRoll(int n, int index, struct Student students[])
+void printRollNumber(int noOfStudents, int index, struct Student students[])
 {
-  if (index == n){
+  if (index == noOfStudents){
     return;
   }
   printf("%d ", students[index].rollNo);
-  printRoll(n, index+1, students);
+  printRollNumber(noOfStudents, index+1, students);
 }
