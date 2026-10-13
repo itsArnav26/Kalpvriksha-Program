@@ -1,5 +1,7 @@
 # include <stdio.h>
 # include <string.h>
+
+
 int main()
 {
   char name[100];
@@ -10,6 +12,10 @@ int main()
   float discount = 0;
   float total;
   float bill;
+
+  const int STANDARD_PRICE = 150;
+  const int PREMIUM_PRICE = 250;
+  const int RECLINER_PRICE = 400;
 
   printf("\n\n-----Welcome to the Ticket Booking System-----\n\n");
 
@@ -45,17 +51,18 @@ int main()
     
     case 1:
       strcpy(category, "Standard");
-      pricePerTicket = 150;
+
+      pricePerTicket = STANDARD_PRICE;
       break;
     
     case 2:
       strcpy(category, "Premium");
-      pricePerTicket = 250;
+      pricePerTicket = PREMIUM_PRICE;
       break;
     
     case 3:
       strcpy(category, "Recliner");
-      pricePerTicket = 400;
+      pricePerTicket = RECLINER_PRICE;
       break;
   }
 
