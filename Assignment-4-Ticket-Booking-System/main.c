@@ -60,7 +60,7 @@ int main(void)
   calculateBillAndDiscount(&discount, &bill, total, noOfTickets);
 
   showBookingDetails(name, category, noOfTickets, total, discount, bill);
-  
+
   return 0;
 }
 
@@ -119,7 +119,6 @@ void calculateBillAndDiscount(float *discount, float *bill, float total, int noO
 void showBookingMenu(void)
 {
   printf("\n\n-----Welcome to the Ticket Booking System-----\n\n");
-
   printf("Choice    Category   Price per Ticket\n");
   printf("1         Standard   150\n");
   printf("2         Premium    250\n");
