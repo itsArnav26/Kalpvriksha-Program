@@ -64,97 +64,31 @@ const char *roleNames[3] =
 };
 
 
-/* Read one complete line. */
-void readLine(char text[], int size)
-{
-    int ch;
-
-    if (fgets(text, size, stdin) == NULL)
-    {
-        printf("\nInput ended.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    if (strchr(text, '\n') != NULL)
-    {
-        text[strcspn(text, "\n")] = '\0';
-    }
-    else
-    {
-        while ((ch = getchar()) != '\n' && ch != EOF)
-        {
-        }
-    }
-}
-
-
-/* Read an integer within a specified range. */
-int readInt(const char *message, int minimum, int maximum)
-{
-    char line[100];
-    char extra;
-    int value;
-
-    while (1)
-    {
-        printf("%s", message);
-        readLine(line, sizeof(line));
-
-        if (sscanf(line, "%d %c", &value, &extra) == 1)
-        {
-            if (value >= minimum && value <= maximum)
-            {
-                return value;
-            }
-        }
-
-        printf("Enter a number from %d to %d.\n",
-               minimum, maximum);
-    }
-}
-
-
-/* Read a non-negative decimal number. */
-float readFloat(const char *message)
-{
-    char line[100];
-    char extra;
-    float value;
-
-    while (1)
-    {
-        printf("%s", message);
-        readLine(line, sizeof(line));
-
-        if (sscanf(line, "%f %c", &value, &extra) == 1)
-        {
-            if (value >= 0 && value <= 1000000000.0f)
-            {
-                return value;
-            }
-        }
-
-        printf("Enter a valid non-negative number.\n");
-    }
-}
-
-
 void readName(char name[])
 {
-    char line[200];
-    int length;
+    int status;
+    int ch;
+    int tooLong;
 
     while (1)
     {
         printf("Player name: ");
-        readLine(line, sizeof(line));
-
-        length = (int)strlen(line);
-
-        if (length >= 1 && length <= 50 &&
-            strspn(line, " \t") != strlen(line))
+        status = scanf("%50[^\n]", name);
+        if (status == EOF)
         {
-            strcpy(name, line);
+            printf("\nInput ended.\n");
+            exit(EXIT_FAILURE);
+        }
+
+        tooLong = 0;
+        while ((ch = getchar()) != '\n' && ch != EOF)
+        {
+            tooLong = 1;
+        }
+
+        if (status == 1 && !tooLong &&
+            strspn(name, " \t\r") != strlen(name))
+        {
             return;
         }
 
@@ -419,10 +353,35 @@ void showTeamIds(void)
 
 Team *selectTeam(void)
 {
+    int status;
+    int ch;
     int id;
     Team *team;
 
-    id = readInt("Enter team ID: ", 1, 1000);
+    while (1)
+    {
+        printf("Enter team ID: ");
+        status = scanf("%d", &id);
+        if (status == EOF)
+        {
+            printf("\nInput ended.\n");
+            exit(EXIT_FAILURE);
+        }
+        /* Clear leftover input before the next prompt. */
+        while ((ch = getchar()) != '\n' && ch != EOF)
+        {
+            if (ch != ' ' && ch != '\t' && ch != '\r')
+            {
+                status = 0;
+            }
+        }
+        if (status == 1 &&
+            id >= 1 && id <= 1000)
+        {
+            break;
+        }
+        printf("Enter a number from 1 to 1000.\n");
+    }
     team = findTeam(id);
 
     if (team == NULL)
@@ -436,11 +395,38 @@ Team *selectTeam(void)
 
 int selectRole(void)
 {
+    int status;
+    int ch;
+    int role;
     printf("\n1. Batsman\n");
     printf("2. Bowler\n");
     printf("3. All-rounder\n");
 
-    return readInt("Select role: ", 1, 3) - 1;
+    while (1)
+    {
+        printf("Select role: ");
+        status = scanf("%d", &role);
+        if (status == EOF)
+        {
+            printf("\nInput ended.\n");
+            exit(EXIT_FAILURE);
+        }
+        /* Clear leftover input before the next prompt. */
+        while ((ch = getchar()) != '\n' && ch != EOF)
+        {
+            if (ch != ' ' && ch != '\t' && ch != '\r')
+            {
+                status = 0;
+            }
+        }
+        if (status == 1 &&
+            role >= 1 && role <= 3)
+        {
+            break;
+        }
+        printf("Enter a number from 1 to 3.\n");
+    }
+    return role - 1;
 }
 
 
@@ -471,6 +457,8 @@ void printPlayer(PlayerNode *player)
 /* Option 1 */
 void addPlayer(void)
 {
+    int status;
+    int ch;
     int id;
     Team *team = selectTeam();
     PlayerNode *player;
@@ -486,7 +474,30 @@ void addPlayer(void)
         return;
     }
 
-    id = readInt("Player ID: ", 1, 1000);
+    while (1)
+    {
+        printf("Player ID: ");
+        status = scanf("%d", &id);
+        if (status == EOF)
+        {
+            printf("\nInput ended.\n");
+            exit(EXIT_FAILURE);
+        }
+        /* Clear leftover input before the next prompt. */
+        while ((ch = getchar()) != '\n' && ch != EOF)
+        {
+            if (ch != ' ' && ch != '\t' && ch != '\r')
+            {
+                status = 0;
+            }
+        }
+        if (status == 1 &&
+            id >= 1 && id <= 1000)
+        {
+            break;
+        }
+        printf("Enter a number from 1 to 1000.\n");
+    }
 
     if (playerIdExists(id))
     {
@@ -502,16 +513,129 @@ void addPlayer(void)
     readName(player->name);
     player->role = selectRole();
 
-    player->totalRuns =
-        readInt("Total runs: ", 0, 1000000000);
+    while (1)
+    {
+        printf("Total runs: ");
+        status = scanf("%d", &player->totalRuns);
+        if (status == EOF)
+        {
+            printf("\nInput ended.\n");
+            exit(EXIT_FAILURE);
+        }
+        /* Clear leftover input before the next prompt. */
+        while ((ch = getchar()) != '\n' && ch != EOF)
+        {
+            if (ch != ' ' && ch != '\t' && ch != '\r')
+            {
+                status = 0;
+            }
+        }
+        if (status == 1 &&
+            player->totalRuns >= 0 && player->totalRuns <= 1000000000)
+        {
+            break;
+        }
+        printf("Enter a number from 0 to 1000000000.\n");
+    }
 
-    player->battingAverage = readFloat("Batting average: ");
-    player->strikeRate = readFloat("Strike rate: ");
+    while (1)
+    {
+        printf("Batting average: ");
+        status = scanf("%f", &player->battingAverage);
+        if (status == EOF)
+        {
+            printf("\nInput ended.\n");
+            exit(EXIT_FAILURE);
+        }
+        /* Clear leftover input before the next prompt. */
+        while ((ch = getchar()) != '\n' && ch != EOF)
+        {
+            if (ch != ' ' && ch != '\t' && ch != '\r')
+            {
+                status = 0;
+            }
+        }
+        if (status == 1 &&
+            player->battingAverage >= 0 && player->battingAverage <= 1000000000.0f)
+        {
+            break;
+        }
+        printf("Enter a number from 0 to 1000000000.\n");
+    }
+    while (1)
+    {
+        printf("Strike rate: ");
+        status = scanf("%f", &player->strikeRate);
+        if (status == EOF)
+        {
+            printf("\nInput ended.\n");
+            exit(EXIT_FAILURE);
+        }
+        /* Clear leftover input before the next prompt. */
+        while ((ch = getchar()) != '\n' && ch != EOF)
+        {
+            if (ch != ' ' && ch != '\t' && ch != '\r')
+            {
+                status = 0;
+            }
+        }
+        if (status == 1 &&
+            player->strikeRate >= 0 && player->strikeRate <= 1000000000.0f)
+        {
+            break;
+        }
+        printf("Enter a number from 0 to 1000000000.\n");
+    }
 
-    player->wickets =
-        readInt("Wickets: ", 0, 1000000000);
+    while (1)
+    {
+        printf("Wickets: ");
+        status = scanf("%d", &player->wickets);
+        if (status == EOF)
+        {
+            printf("\nInput ended.\n");
+            exit(EXIT_FAILURE);
+        }
+        /* Clear leftover input before the next prompt. */
+        while ((ch = getchar()) != '\n' && ch != EOF)
+        {
+            if (ch != ' ' && ch != '\t' && ch != '\r')
+            {
+                status = 0;
+            }
+        }
+        if (status == 1 &&
+            player->wickets >= 0 && player->wickets <= 1000000000)
+        {
+            break;
+        }
+        printf("Enter a number from 0 to 1000000000.\n");
+    }
 
-    player->economyRate = readFloat("Economy rate: ");
+    while (1)
+    {
+        printf("Economy rate: ");
+        status = scanf("%f", &player->economyRate);
+        if (status == EOF)
+        {
+            printf("\nInput ended.\n");
+            exit(EXIT_FAILURE);
+        }
+        /* Clear leftover input before the next prompt. */
+        while ((ch = getchar()) != '\n' && ch != EOF)
+        {
+            if (ch != ' ' && ch != '\t' && ch != '\r')
+            {
+                status = 0;
+            }
+        }
+        if (status == 1 &&
+            player->economyRate >= 0 && player->economyRate <= 1000000000.0f)
+        {
+            break;
+        }
+        printf("Enter a number from 0 to 1000000000.\n");
+    }
 
     insertPlayer(team, player);
 
@@ -552,10 +676,6 @@ void displayTeam(void)
 }
 
 
-/*
-    Insertion sort is sufficient for the fixed 10 teams.
-    This option has no specified complexity requirement.
-*/
 
 /* Option 3 */
 void displayRankedTeams(void)
@@ -603,6 +723,8 @@ void displayRankedTeams(void)
 /* Option 4 */
 void displayTopPlayers(void)
 {
+    int status;
+    int ch;
     Team *team = selectTeam();
     PlayerNode *current;
     int role;
@@ -615,7 +737,30 @@ void displayTopPlayers(void)
     }
 
     role = selectRole();
-    count = readInt("How many players? ", 1, MAX_PLAYERS);
+    while (1)
+    {
+        printf("How many players? ");
+        status = scanf("%d", &count);
+        if (status == EOF)
+        {
+            printf("\nInput ended.\n");
+            exit(EXIT_FAILURE);
+        }
+        /* Clear leftover input before the next prompt. */
+        while ((ch = getchar()) != '\n' && ch != EOF)
+        {
+            if (ch != ' ' && ch != '\t' && ch != '\r')
+            {
+                status = 0;
+            }
+        }
+        if (status == 1 &&
+            count >= 1 && count <= MAX_PLAYERS)
+        {
+            break;
+        }
+        printf("Enter a number from 1 to 50.\n");
+    }
 
     current = team->heads[role];
 
@@ -801,6 +946,8 @@ void freePlayers(void)
 
 int main(void)
 {
+    int status;
+    int ch;
     int choice;
 
     initializeData();
@@ -820,7 +967,30 @@ int main(void)
         printf("5. Display all players of one role\n");
         printf("6. Exit\n");
 
-        choice = readInt("Enter your choice: ", 1, 6);
+        while (1)
+        {
+            printf("Enter your choice: ");
+            status = scanf("%d", &choice);
+            if (status == EOF)
+            {
+                printf("\nInput ended.\n");
+                exit(EXIT_FAILURE);
+            }
+            /* Clear leftover input before the next prompt. */
+            while ((ch = getchar()) != '\n' && ch != EOF)
+            {
+                if (ch != ' ' && ch != '\t' && ch != '\r')
+                {
+                    status = 0;
+                }
+            }
+            if (status == 1 &&
+                choice >= 1 && choice <= 6)
+            {
+                break;
+            }
+            printf("Enter a number from 1 to 6.\n");
+        }
 
         switch (choice)
         {
